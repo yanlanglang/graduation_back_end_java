@@ -1,0 +1,17 @@
+com\niit\graduation\web\customer\LoginOrRegisterController.class
+com\niit\graduation\GraduationApplication.class
+com\niit\graduation\util\MyBeanUtils.class
+com\niit\graduation\service\serviceImpl\CustomerServiceImpl.class
+com\niit\graduation\util\JudgeUtils.class
+com\niit\graduation\web\common\DemoController.class
+com\niit\graduation\entity\Comment.class
+com\niit\graduation\service\CustomerService.class
+com\niit\graduation\config\MyMvcConfig$1.class
+com\niit\graduation\repository\CustomerRepository.class
+com\niit\graduation\entity\Customer.class
+com\niit\graduation\web\common\DemoAjaxController.class
+com\niit\graduation\config\MyMvcConfig.class
+com\niit\graduation\entity\Blog.class
+com\niit\graduation\web\customer\BlogInputController.class
+com\niit\graduation\util\Md5Utils.class
+com\niit\graduation\entity\Admin.class

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Blockly 与 CodeMirror</title>
+    <link rel="shortcut icon" th:href="@{/favicon.ico}"/>
+    <link rel="bookmark" th:href="@{/favicon.ico}"/>
+
+    <script th:src="@{/lib/blockly/blockly_compressed.js}" src="blockly/blockly_compressed.js"></script>
+    <script th:src="@{/lib/blockly/blocks_compressed.js}" src="blockly/blocks_compressed.js"></script>
+    <!--代码生成器-->
+    <script th:src="@{/lib/blockly/javascript_compressed.js}" src="blockly/javascript_compressed.js"></script>
+    <script th:src="@{/lib/blockly/python_compressed.js}" src="blockly/python_compressed.js"></script>
+    <script th:src="@{/lib/blockly/php_compressed.js}" src="blockly/php_compressed.js"></script>
+
+    <!--云储存-->
+    <script th:src="@{/lib/blockly/storage.js}" src="blockly/storage.js"></script>
+    <script th:src="@{/lib/blockly/en.js}" src="blockly/en.js"></script>
+    <!--<script src="../../msg/js/zh-hans.js"></script>-->
+    <!--导出-->
+    <script th:src="@{/lib/blockly/file_saver.js}"></script>
+
+    <!--CodeMirror-->
+    <!--核心包-->
+    <link th:href="@{/lib/codemirror/lib/codemirror.css}" rel="stylesheet" href="codemirror/lib/codemirror.css"/>
+    <script th:src="@{/lib/codemirror/lib/codemirror.js}" src="codemirror/lib/codemirror.js"></script>
+
+    <!--引入主题文件-->
+    <link th:href="@{/lib/codemirror/theme/dracula.css}" rel="stylesheet" href="codemirror/theme/dracula.css"/>
+    <link th:href="@{/lib/codemirror/theme/panda-syntax.css}" rel="stylesheet"
+          href="codemirror/theme/panda-syntax.css"/>
+    <link th:href="@{/lib/codemirror/theme/shadowfox.css}" rel="stylesheet" href="codemirror/theme/shadowfox.css"/>
+    <link th:href="@{/lib/codemirror/theme/yonce.css}" rel="stylesheet" href="codemirror/theme/yonce.css"/>
+
+
+    <!--引入要编辑的语言对应的js文件(这里以javascript为例)-->
+    <script th:src="@{/lib/codemirror/mode/javascript/javascript.js}"
+            src="codemirror/mode/javascript/javascript.js"></script>
+    <script th:src="@{/lib/codemirror/mode/php/php.js}" src="codemirror/mode/php/php.js"></script>
+    <script th:src="@{/lib/codemirror/mode/python/python.js}" src="codemirror/mode/python/python.js"></script>
+    <script th:src="@{/lib/codemirror/mode/xml/xml.js}" src="codemirror/mode/xml/xml.js"></script>
+
+    <!--支持代码折叠-->
+    <link th:href="@{/lib/codemirror/fold/foldgutter.css}" rel="stylesheet" href="codemirror/fold/foldgutter.css"/>
+    <script th:src="@{/lib/codemirror/fold/foldcode.js}" src="codemirror/fold/foldcode.js"></script>
+    <script th:src="@{/lib/codemirror/fold/foldgutter.js}" src="codemirror/fold/foldgutter.js"></script>
+    <script th:src="@{/lib/codemirror/fold/brace-fold.js}" src="codemirror/fold/brace-fold.js"></script>
+    <script th:src="@{/lib/codemirror/fold/comment-fold.js}" src="codemirror/fold/comment-fold.js"></script>
+
+    <!--添加JQury库(CDN方式)-->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+
+    <style>
+        /* html, body {
+             height: 100%;
+             margin: 0;
+         }
+
+         body {
+             background-color: #fff;
+             font-family: sans-serif;
+             overflow: hidden;
+         }
+
+         h1 {
+             font-weight: normal;
+             font-size: 140%;
+         }
+
+         table {
+             height: 100%;
+             width: 100%;
+         }*/
+
+        #blocklyArea {
+            height: 99%;
+        }
+    </style>
+</head>
+<body>
+
+<div style="margin-top: 20px">
+
+    <!--workspace区域-->
+    <div style="height: 500px;width: 1000px;float: left">
+        <!--blocklyArea必须在blocklyDiv的上方-->
+        <div id="blocklyArea"></div>
+
+        <div id="blocklyDiv" style="position: absolute"></div>
+
+        <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+            <category name="Logic" colour="#5b80a5">
+                <block type="controls_if"></block>
+                <block type="logic_compare">
+                    <field name="OP">EQ</field>
+                </block>
+                <block type="logic_operation">
+                    <field name="OP">AND</field>
+                </block>
+                <block type="logic_negate"></block>
+                <block type="logic_boolean">
+                    <field name="BOOL">TRUE</field>
+                </block>
+                <block type="logic_null"></block>
+                <block type="logic_ternary"></block>
+            </category>
+            <category name="Loops" colour="#5ba55b">
+                <block type="controls_repeat_ext">
+                    <value name="TIMES">
+                        <shadow type="math_number">
+                            <field name="NUM">10</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="controls_whileUntil">
+                    <field name="MODE">WHILE</field>
+                </block>
+                <block type="controls_for">
+                    <field name="VAR" id="IvPaBcj2%~L@u~J-8wre">i</field>
+                    <value name="FROM">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                    <value name="TO">
+                        <shadow type="math_number">
+                            <field name="NUM">10</field>
+                        </shadow>
+                    </value>
+                    <value name="BY">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="controls_forEach">
+                    <field name="VAR" id="W*lVDUM!zWhPri1x=xba">j</field>
+                </block>
+                <block type="controls_flow_statements">
+                    <field name="FLOW">BREAK</field>
+                </block>
+            </category>
+            <category name="Math" colour="#5b67a5">
+                <block type="math_number">
+                    <field name="NUM">0</field>
+                </block>
+                <block type="math_arithmetic">
+                    <field name="OP">ADD</field>
+                    <value name="A">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                    <value name="B">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_single">
+                    <field name="OP">ROOT</field>
+                    <value name="NUM">
+                        <shadow type="math_number">
+                            <field name="NUM">9</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_trig">
+                    <field name="OP">SIN</field>
+                    <value name="NUM">
+                        <shadow type="math_number">
+                            <field name="NUM">45</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_constant">
+                    <field name="CONSTANT">PI</field>
+                </block>
+                <block type="math_number_property">
+                    <mutation divisor_input="false"></mutation>
+                    <field name="PROPERTY">EVEN</field>
+                    <value name="NUMBER_TO_CHECK">
+                        <shadow type="math_number">
+                            <field name="NUM">0</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_round">
+                    <field name="OP">ROUND</field>
+                    <value name="NUM">
+                        <shadow type="math_number">
+                            <field name="NUM">3.1</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_on_list">
+                    <mutation op="SUM"></mutation>
+                    <field name="OP">SUM</field>
+                </block>
+                <block type="math_modulo">
+                    <value name="DIVIDEND">
+                        <shadow type="math_number">
+                            <field name="NUM">64</field>
+                        </shadow>
+                    </value>
+                    <value name="DIVISOR">
+                        <shadow type="math_number">
+                            <field name="NUM">10</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_constrain">
+                    <value name="VALUE">
+                        <shadow type="math_number">
+                            <field name="NUM">50</field>
+                        </shadow>
+                    </value>
+                    <value name="LOW">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                    <value name="HIGH">
+                        <shadow type="math_number">
+                            <field name="NUM">100</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_random_int">
+                    <value name="FROM">
+                        <shadow type="math_number">
+                            <field name="NUM">1</field>
+                        </shadow>
+                    </value>
+                    <value name="TO">
+                        <shadow type="math_number">
+                            <field name="NUM">100</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="math_random_float"></block>
+            </category>
+            <category name="Text" colour="#5ba58c">
+                <block type="text">
+                    <field name="TEXT"></field>
+                </block>
+                <block type="text_join">
+                    <mutation items="2"></mutation>
+                </block>
+                <block type="text_append">
+                    <field name="VAR" id="[M*nsxCpYNn,N15m:0eV">item</field>
+                    <value name="TEXT">
+                        <shadow type="text">
+                            <field name="TEXT"></field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_length">
+                    <value name="VALUE">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_isEmpty">
+                    <value name="VALUE">
+                        <shadow type="text">
+                            <field name="TEXT"></field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_indexOf">
+                    <field name="END">FIRST</field>
+                    <value name="VALUE">
+                        <block type="variables_get">
+                            <field name="VAR" id="L8/@S;(b/!6XqH,gIT%m">text</field>
+                        </block>
+                    </value>
+                    <value name="FIND">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_charAt">
+                    <mutation at="true"></mutation>
+                    <field name="WHERE">FROM_START</field>
+                    <value name="VALUE">
+                        <block type="variables_get">
+                            <field name="VAR" id="L8/@S;(b/!6XqH,gIT%m">text</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="text_getSubstring">
+                    <mutation at1="true" at2="true"></mutation>
+                    <field name="WHERE1">FROM_START</field>
+                    <field name="WHERE2">FROM_START</field>
+                    <value name="STRING">
+                        <block type="variables_get">
+                            <field name="VAR" id="L8/@S;(b/!6XqH,gIT%m">text</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="text_changeCase">
+                    <field name="CASE">UPPERCASE</field>
+                    <value name="TEXT">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_trim">
+                    <field name="MODE">BOTH</field>
+                    <value name="TEXT">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_print">
+                    <value name="TEXT">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="text_prompt_ext">
+                    <mutation type="TEXT"></mutation>
+                    <field name="TYPE">TEXT</field>
+                    <value name="TEXT">
+                        <shadow type="text">
+                            <field name="TEXT">abc</field>
+                        </shadow>
+                    </value>
+                </block>
+            </category>
+            <category name="Lists" colour="#745ba5">
+                <block type="lists_create_with">
+                    <mutation items="0"></mutation>
+                </block>
+                <block type="lists_create_with">
+                    <mutation items="3"></mutation>
+                </block>
+                <block type="lists_repeat">
+                    <value name="NUM">
+                        <shadow type="math_number">
+                            <field name="NUM">5</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="lists_length"></block>
+                <block type="lists_isEmpty"></block>
+                <block type="lists_indexOf">
+                    <field name="END">FIRST</field>
+                    <value name="VALUE">
+                        <block type="variables_get">
+                            <field name="VAR" id="W,:]8S:2+1PRaioP=dN`">list</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="lists_getIndex">
+                    <mutation statement="false" at="true"></mutation>
+                    <field name="MODE">GET</field>
+                    <field name="WHERE">FROM_START</field>
+                    <value name="VALUE">
+                        <block type="variables_get">
+                            <field name="VAR" id="W,:]8S:2+1PRaioP=dN`">list</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="lists_setIndex">
+                    <mutation at="true"></mutation>
+                    <field name="MODE">SET</field>
+                    <field name="WHERE">FROM_START</field>
+                    <value name="LIST">
+                        <block type="variables_get">
+                            <field name="VAR" id="W,:]8S:2+1PRaioP=dN`">list</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="lists_getSublist">
+                    <mutation at1="true" at2="true"></mutation>
+                    <field name="WHERE1">FROM_START</field>
+                    <field name="WHERE2">FROM_START</field>
+                    <value name="LIST">
+                        <block type="variables_get">
+                            <field name="VAR" id="W,:]8S:2+1PRaioP=dN`">list</field>
+                        </block>
+                    </value>
+                </block>
+                <block type="lists_split">
+                    <mutation mode="SPLIT"></mutation>
+                    <field name="MODE">SPLIT</field>
+                    <value name="DELIM">
+                        <shadow type="text">
+                            <field name="TEXT">,</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="lists_sort">
+                    <field name="TYPE">NUMERIC</field>
+                    <field name="DIRECTION">1</field>
+                </block>
+            </category>
+            <category name="Colour" colour="#a5745b">
+                <block type="colour_picker">
+                    <field name="COLOUR">#ff0000</field>
+                </block>
+                <block type="colour_random"></block>
+                <block type="colour_rgb">
+                    <value name="RED">
+                        <shadow type="math_number">
+                            <field name="NUM">100</field>
+                        </shadow>
+                    </value>
+                    <value name="GREEN">
+                        <shadow type="math_number">
+                            <field name="NUM">50</field>
+                        </shadow>
+                    </value>
+                    <value name="BLUE">
+                        <shadow type="math_number">
+                            <field name="NUM">0</field>
+                        </shadow>
+                    </value>
+                </block>
+                <block type="colour_blend">
+                    <value name="COLOUR1">
+                        <shadow type="colour_picker">
+                            <field name="COLOUR">#ff0000</field>
+                        </shadow>
+                    </value>
+                    <value name="COLOUR2">
+                        <shadow type="colour_picker">
+                            <field name="COLOUR">#3333ff</field>
+                        </shadow>
+                    </value>
+                    <value name="RATIO">
+                        <shadow type="math_number">
+                            <field name="NUM">0.5</field>
+                        </shadow>
+                    </value>
+                </block>
+            </category>
+            <sep></sep>
+            <category name="Variables" colour="#a55b80" custom="VARIABLE"></category>
+            <category name="Functions" colour="#995ba5" custom="PROCEDURE"></category>
+        </xml>
+
+    </div>
+
+
+    <!--显示代码和相关按钮功能-->
+    <div style="margin-left: 1030px;position: absolute">
+        <!--选择需要转换的语言-->
+        <div>
+            <button id="getCode_javascript" onclick="myUpdateFunction('javascript')">JavaScript</button>
+            <button id="getCode_python" onclick="myUpdateFunction('python')">Python</button>
+            <button id="getCode_php" onclick="myUpdateFunction('php')">PHP</button>
+            <button id="getCode_xml" onclick="myUpdateFunction('xml')">XML</button>
+
+            <!--运行-->
+            <button id="runBtn">R U N</button>
+            <!--导出-->
+            <button id="exportBtn">Export</button>
+            <!--导入-->
+            <input id="importBtn" type="file" value="Import">
+        </div>
+
+        <!--显示代码-->
+        <textarea class="form-control" id="textarea" name=""></textarea>
+
+    </div>
+
+    <div style="margin-top: 510px;position: absolute">
+        <textarea id="runText" name="" cols="206" rows="18"></textarea>
+    </div>
+
+</div>
+<script>
+
+
+    /*--------------------------------CODEMIRROR BEGIN-----------------------------------*/
+
+    //根据DOM元素的id构造出一个编辑器
+    //(经过CodeMirror美化)文本框中显示的内容
+    let editor = CodeMirror.fromTextArea(document.getElementById("textarea"), {
+        mode: "text/javascript", //实现javascript代码高亮
+        lineNumbers: true,	//显示行号
+        indentUnit: 4,         // 缩进单位为4
+        theme: "panda-syntax",	//设置主题
+        lineWrapping: true,	//代码折叠
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        matchBrackets: true,	//括号匹配
+        //readOnly: true,        //只读
+    });
+    editor.setSize('473px', '448px');
+
+    let e = CodeMirror.fromTextArea(document.getElementById("runText"), {
+        mode: "text/javascript", //实现javascript代码高亮
+        lineNumbers: false,	//显示行号
+        indentUnit: 4,         // 缩进单位为4
+        theme: "panda-syntax",	//设置主题
+        lineWrapping: true,	//代码折叠
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        matchBrackets: true,	//括号匹配
+        //readOnly: true,        //只读
+    });
+    e.setSize('1503px', '300px');
+    e.setValue("Run result in there.");
+
+
+    /*--------------------------------CODEMIRROR OVER-----------------------------------*/
+
+    /*--------------------------------BLOCKLY BEGIN-----------------------------------*/
+    /*消息定义*/
+    if ('BlocklyStorage' in window) {
+        BlocklyStorage.HTTPREQUEST_ERROR = 'There was a problem with the request.\n';
+        BlocklyStorage.LINK_ALERT = 'Share your blocks with this link:\n\n%1';
+        BlocklyStorage.HASH_ERROR = 'Sorry, "%1" doesn\'t correspond with any saved Blockly file.';
+        BlocklyStorage.XML_ERROR = 'Could not load your saved file.\n' +
+            'Perhaps it was created with a different version of Blockly?';
+    } else {
+        document.write('<p id="sorry">Sorry, cloud storage is not available.  This demo must be hosted on App Engine.</p>');
+    }
+
+    /*可调整大小的工作区域*/
+    var blocklyArea = document.getElementById('blocklyArea');
+    var blocklyDiv = document.getElementById('blocklyDiv');
+    var demoWorkspace = Blockly.inject(blocklyDiv,
+        {
+            media: 'lib/blockly/media/',
+            /*工具箱*/
+            toolbox: document.getElementById('toolbox'),
+            /*网格*/
+            grid: {
+                /*间距*/
+                spacing: 20,
+                /*长度*/
+                length: 3,
+                /*颜色*/
+                colour: '#000000',
+                /*捕捉*/
+                snap: true
+            },
+            /*缩放*/
+            zoom:
+                {
+                    /*控制项*/
+                    controls: true,
+                    /*鼠标滚轮控制*/
+                    wheel: true,
+                    /*最初倍数*/
+                    startScale: 1.0,
+                    /*最大倍数*/
+                    maxScale: 3,
+                    /*最小倍数*/
+                    minScale: 0.3,
+                    /*缩放速度*/
+                    scaleSpeed: 1.2
+                },
+            /*移动*/
+            move: {
+                scrollbars: true,
+                drag: true,
+                wheel: true
+            },
+            /*trashcan：默认为true，即显示垃圾箱*/
+            trashcan: true
+        });
+    var onresize = function (e) {
+        // Compute the absolute coordinates and dimensions of blocklyArea.
+        var element = blocklyArea;
+        var x = 0;
+        var y = 0;
+        do {
+            x += element.offsetLeft;
+            y += element.offsetTop;
+            element = element.offsetParent;
+        } while (element);
+        // Position blocklyDiv over blocklyArea.
+        blocklyDiv.style.left = x + 'px';
+        blocklyDiv.style.top = y + 'px';
+        blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+        blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+        Blockly.svgResize(demoWorkspace);
+    };
+    window.addEventListener('resize', onresize, false);
+    onresize();
+    Blockly.svgResize(demoWorkspace);
+
+
+    // An href with #key trigers an AJAX call to retrieve saved blocks.
+    if ('BlocklyStorage' in window && window.location.hash.length > 1) {
+        BlocklyStorage.retrieveXml(window.location.hash.substring(1));
+    }
+
+
+    //记录上一次点击的按钮
+    let prevName = "javascript";
+    //(未经过CodeMirror美化)文本框中显示的内容(初始值)
+    let code = "hello niit！";
+
+    /*代码生成区域*/
+    function myUpdateFunction(name) {
+        //去除监听器的干扰
+        if (typeof (name) == "object") {
+            name = prevName;
+        }
+
+        //判断当前应该生成什么代码
+        switch (name) {
+            case "javascript":
+                prevName = "javascript";
+                //生成javascript代码
+                code = Blockly.JavaScript.workspaceToCode(demoWorkspace);
+                //设置代码的高亮形式
+                editor.setOption("mode", "text/javascript");
+                break;
+            case "python":
+                prevName = "python";
+                //生成python代码
+                code = Blockly.Python.workspaceToCode(demoWorkspace);
+                //设置代码的高亮形式
+                editor.setOption("mode", "python");
+                break;
+            case "php":
+                prevName = "php";
+                //生成php代码
+                code = Blockly.PHP.workspaceToCode(demoWorkspace);
+                //设置代码的高亮形式
+                editor.setOption("mode", "php");
+                break;
+            case "xml":
+                prevName = "xml";
+                //未经格式化的xml字符串
+                var xml_dom = Blockly.Xml.workspaceToDom(demoWorkspace);
+                //格式化之后的xml字符串
+                code = Blockly.Xml.domToPrettyText(xml_dom);
+                //设置代码的高亮形式
+                editor.setOption("mode", "text/xml");
+                break;
+            default:
+                prevName = "javascript";
+                //生成javascript代码
+                code = Blockly.JavaScript.workspaceToCode(demoWorkspace);
+                //设置代码的高亮形式
+                editor.setOption("mode", "text/javascript");
+
+        }
+        //给代码框赋值
+        editor.setValue(code);
+    }
+
+    //添加改变的监听器
+    demoWorkspace.addChangeListener(myUpdateFunction);
+    /*--------------------------------BLOCK OVER-----------------------------------*/
+
+    /*--------------------------------CLICK FUN BEGIN-----------------------------------*/
+
+    //异步提交数据到后台
+    $("#runBtn").click(function () {
+        if (code==="hello niit！"){
+            alert("没有代码需要执行，请尝试拖动页面左侧的Block！")
+        }else {
+            $.ajax({
+                url: "/crud/subCode",
+                type: "post",
+                traditional: true,
+                data: {
+                    codeType: prevName,
+                    codeContent: code
+                },
+                success:function (map) {
+                    //console.log(map);
+                    if (map.stderr===null){
+                        e.setValue(map.stdout);
+                    }else {
+                        e.setValue(map.stderr);
+                    }
+                },
+                error:function (e) {
+                    console.log(e);
+                },
+                dataType: "json"
+            })
+        }
+    });
+
+    //导出xml文件
+    $("#exportBtn").click(function () {
+        var xmlDom = Blockly.Xml.workspaceToDom(demoWorkspace);
+        var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+
+        var blob = new Blob([xmlText]);
+        window.saveAs(blob, "blockly.xml")
+    });
+
+    //导入xml文件
+    document.getElementById("importBtn").addEventListener("change", function () {
+        var file = this.files[0];
+        var reader = new FileReader();
+
+        var rawlog = "empty";
+        reader.readAsText(file);
+
+        reader.onload = function (e) {
+            rawlog = reader.result;
+            demoWorkspace.clear();
+            var xml = Blockly.Xml.textToDom(rawlog);
+            Blockly.Xml.domToWorkspace(xml, demoWorkspace);
+        };
+    });
+
+    /*--------------------------------CLICK FUN OVER-----------------------------------*/
+
+
+</script>
+</body>
+</html>
