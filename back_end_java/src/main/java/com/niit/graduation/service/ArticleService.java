@@ -4,6 +4,8 @@ import com.niit.graduation.entity.Article;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * @Author Yan Lang
  * @Date 2020/12/2
@@ -44,11 +46,23 @@ public interface ArticleService {
     Page<Article> listBlogWithAdmin(Pageable pageable);
 
     /**
+     * 获取最新的管理员(admin)文章
+     * @return
+     */
+    List<Article> listBlogWithAdmin();
+
+    /**
      * 关于(customer)blog的分页
      * @param pageable
      * @return
      */
     Page<Article> listBlogWithCustomer(Pageable pageable);
+
+    /**
+     * 获取最新的用户(customer)文章
+     * @return
+     */
+    List<Article> listBlogWithCustomer();
 
     /**
      * 查找博客

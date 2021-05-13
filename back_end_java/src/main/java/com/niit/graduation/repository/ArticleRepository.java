@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 /**
  * @Author Yan Lang
@@ -16,7 +17,11 @@ import javax.transaction.Transactional;
  */
 public interface ArticleRepository extends JpaRepository<Article,Long> {
 
-
+    /**
+     * 更新阅读数
+     * @param id
+     * @return
+     */
     @Transactional
     @Modifying
     @Query("update Article a set a.views = a.views+1 where a.id = ?1")
@@ -30,6 +35,13 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
      */
     Page<Article> findArticlesByCustomerNotNull(Pageable pageable);
 
+    /**
+     * 获取最新的几篇customer的文章
+     * @param pageable
+     * @return
+     */
+    List<Article> findTopByCustomerNotNull(Pageable pageable);
+
 
     /**
      * 查找admin的文章
@@ -37,5 +49,12 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
      * @return
      */
     Page<Article> findArticlesByCustomerNull(Pageable pageable);
+
+    /**
+     * 获取最新的几篇admin的文章
+     * @param pageable
+     * @return
+     */
+    List<Article> findTopByCustomerNull(Pageable pageable);
 
 }

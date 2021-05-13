@@ -33,12 +33,25 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer editCustomer(Customer customer) {
-        customerRepository.updateAvatarById(customer.getId(),
-                customer.getAvatar(),
-                customer.getNickname(),
-                customer.getMail(),
-                customer.getGender(),
-                customer.getUpdateTime());
+
+        if (customer.getAvatar()==null){
+            //不修改头像
+            customerRepository.updateOthersById(customer.getId(),
+                    customer.getNickname(),
+                    customer.getMail(),
+                    customer.getGender(),
+                    customer.getUpdateTime());
+        }else {
+            //修改头像
+            customerRepository.updateAvatarById(customer.getId(),
+                    customer.getAvatar(),
+                    customer.getNickname(),
+                    customer.getMail(),
+                    customer.getGender(),
+                    customer.getUpdateTime());
+        }
+
+
 
         return customerRepository.getOne(customer.getId());
     }

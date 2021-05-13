@@ -36,17 +36,14 @@ public class CustomerController {
                                     Customer customer){
 
         //判断是否上传图片
-        if (file.isEmpty()) {
-            //即没有修改头像
-            return ResultJsonUtils.error("文件为空");
-
-        } else {
+        if (file==null) {
+            System.out.println("没有修改头像");
+        }else {
             //文件名
             String fileName = customer.getId()+"_"+ MathRandomUtils.getRandom(0)+".jpg";
 
             //图片路径(映射后的)
             String mapAvatar = PathUtils.getMapAvatarPath(fileName);
-
 
             //生成文件(实际路径)
             File dest = new File(PathUtils.getAvatarPath(fileName));
@@ -61,13 +58,12 @@ public class CustomerController {
 
             //设置映射路径
             customer.setAvatar(mapAvatar);
-            customer.setUpdateTime(new Date());
 
-            Customer c = customerService.editCustomer(customer);
-
-            return ResultJsonUtils.ok("修改个人信息", c);
         }
+        customer.setUpdateTime(new Date());
+        Customer c = customerService.editCustomer(customer);
 
+        return ResultJsonUtils.ok("修改个人信息", c);
 
     }
 

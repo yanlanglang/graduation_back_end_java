@@ -34,7 +34,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
     Customer findCustomerByUsernameOrMail(String username,String mail);
 
     /**
-     * 通过用户的id修改头像信息
+     * 通过用户的id修改头像和其它信息
      * 事务注解（Transactional），增删改（Modifying）
      * @return
      */
@@ -42,6 +42,17 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
     @Modifying
     @Query("update Customer c set c.avatar = ?2 , c.nickname = ?3 , c.mail = ?4 , c.gender = ?5 , c.updateTime = ?6 where c.id = ?1")
     int updateAvatarById(Long id, String avatar, String nickname, String mail, String gender, Date updateTime);
+
+    /**
+     * 通过用户的id修改其它信息
+     * 事务注解（Transactional），增删改（Modifying）
+     * @return
+     */
+    @Transactional
+    @Modifying
+    @Query("update Customer c set  c.nickname = ?2 , c.mail = ?3 , c.gender = ?4 , c.updateTime = ?5 where c.id = ?1")
+    int updateOthersById(Long id,  String nickname, String mail, String gender, Date updateTime);
+
 
 
 

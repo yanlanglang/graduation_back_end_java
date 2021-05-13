@@ -3,9 +3,11 @@ package com.niit.graduation.service.serviceImpl;
 import com.niit.graduation.entity.Article;
 import com.niit.graduation.entity.Comment;
 import com.niit.graduation.entity.Customer;
+import com.niit.graduation.entity.Message;
 import com.niit.graduation.repository.ArticleRepository;
 import com.niit.graduation.repository.CommentRepository;
 import com.niit.graduation.repository.CustomerRepository;
+import com.niit.graduation.repository.MessageRepository;
 import com.niit.graduation.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,20 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private MessageRepository messageRepository;
+
+    /**
+     * 每保存一条评论，就要创建一条消息记录
+     * @param receiverId 文章作者的id
+     * @param senderId 评论人的id
+     * @param content 评论内容
+     */
+    public void saveMessage(Long receiverId, Long senderId, String content){
+        Message message = new Message(null, receiverId, senderId, content,new Date());
+        messageRepository.save(message);
+    }
+
     @Override
     public void saveComment(Comment comment , Long articleId) {
 
@@ -44,6 +60,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setArticle(article);
         comment.setParentComment(null);
         comment.setCreateTime(new Date());
+
+        //保存记录
+        saveMessage(article.getCustomer().getId(),comment.getCustomerId(),comment.getContent());
 
         commentRepository.save(comment);
     }
@@ -62,6 +81,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setArticle(article);
         comment.setCreateTime(new Date());
         comment.setParentComment(parentComment);
+
+        //保存记录
+        saveMessage(article.getCustomer().getId(),comment.getCustomerId(),comment.getContent());
+
         commentRepository.save(comment);
 
     }

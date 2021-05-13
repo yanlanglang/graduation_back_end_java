@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.*;
 public class MyMvcConfig {
 
     private final static String local_default_avatar_path = "file:/C:\\Users\\yanlang\\Desktop\\graduation\\avatar\\";
-    private final static String local_custom_avatar_path = "file:/C:\\Users\\yanlang\\Desktop\\graduation\\article/";
+    private final static String local_upload_file_path = "file:/C:\\Users\\yanlang\\Desktop\\graduation\\example/";
     private final static String ssh_avatar_path = "file:/root/Career/Java/niit/avatars/";
 
 
@@ -50,7 +50,7 @@ public class MyMvcConfig {
                 //本地默认头像
                 registry.addResourceHandler("/localAvatar/**").addResourceLocations(local_default_avatar_path);
                 //本地上传的图片
-                registry.addResourceHandler("/localUpload/**").addResourceLocations(local_custom_avatar_path);
+                registry.addResourceHandler("/localUpload/**").addResourceLocations(local_upload_file_path);
 
                 //远程默认头像
                 registry.addResourceHandler("/sshDefaultAvatar/**").addResourceLocations(ssh_avatar_path);

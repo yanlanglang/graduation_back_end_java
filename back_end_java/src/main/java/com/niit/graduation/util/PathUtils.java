@@ -32,17 +32,17 @@ public class PathUtils {
 
 
     /**
-     * 自定义的上传的图片地址
+     * 自定义上传案例的文件地址
      * 本地：C:/Users/yanlang/Desktop/wbw/picture/
      * 远程：root/Others/photos/wbw/picture/
      */
-    public static String definePicture = "C:\\Users\\yanlang\\Desktop\\graduation\\article/";
+    public static String defineExampleFile = "C:\\Users\\yanlang\\Desktop\\graduation\\example/";
     /**
-     * 自定义的上传的图片地址 的映射路径
+     * 自定义上传案例的文件地址 的映射路径
      * 本地：/localDownload/
      * 远程：/sshDownload/
      */
-    public static String mapDefinePicture = "/localUpload/";
+    public static String mapDefineExampleFile = "/localUpload/";
 
 
 
@@ -61,8 +61,8 @@ public class PathUtils {
      * @param fileName
      * @return
      */
-    public static String getPicturePath (String fileName){
-        return definePicture+fileName;
+    public static String getExampleFilePath (String fileName){
+        return defineExampleFile+fileName;
     }
 
     /**
@@ -79,8 +79,8 @@ public class PathUtils {
      * @param fileName
      * @return
      */
-    public static String getMapPicturePath(String fileName){
-        return mapDefinePicture+fileName;
+    public static String getMapExampleFilePath(String fileName){
+        return mapDefineExampleFile+fileName;
     }
 
 }

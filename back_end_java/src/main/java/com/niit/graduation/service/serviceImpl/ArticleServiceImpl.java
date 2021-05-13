@@ -12,6 +12,7 @@ import com.niit.graduation.service.ArticleService;
 import com.niit.graduation.util.MarkdownUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -108,8 +109,34 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    public List<Article> listBlogWithAdmin() {
+        Sort sort = Sort.by(Sort.Direction.DESC,"createTime");
+
+        /*
+            param1:当前查询的页数
+            param2:每页查询的数量
+            param3:Sort实例
+         */
+        Pageable pageable = PageRequest.of(0, 5, sort);
+        return blogRepository.findTopByCustomerNull(pageable);
+    }
+
+    @Override
     public Page<Article> listBlogWithCustomer(Pageable pageable) {
         return blogRepository.findArticlesByCustomerNotNull(pageable);
+    }
+
+    @Override
+    public List<Article> listBlogWithCustomer() {
+        Sort sort = Sort.by(Sort.Direction.DESC,"createTime");
+
+        /*
+            param1:当前查询的页数
+            param2:每页查询的数量
+            param3:Sort实例
+         */
+        Pageable pageable = PageRequest.of(0, 5, sort);
+        return blogRepository.findTopByCustomerNotNull(pageable);
     }
 
     @Override
