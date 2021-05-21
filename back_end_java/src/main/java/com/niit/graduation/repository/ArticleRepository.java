@@ -40,6 +40,7 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
      * @param pageable
      * @return
      */
+    @Query("select a from Article a where a.customer is not null ")
     List<Article> findTopByCustomerNotNull(Pageable pageable);
 
 
@@ -55,6 +56,7 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
      * @param pageable
      * @return
      */
+    @Query("select a from Article a where a.customer is null ")
     List<Article> findTopByCustomerNull(Pageable pageable);
 
 }
